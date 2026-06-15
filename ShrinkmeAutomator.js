@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Combined Link Bypasser & Observer
+// @name         Shrinkme to Themezon Automator
 // @namespace    http://tampermonkey.net/
 // @version      1.1
 // @description  Automates link bypassing across shrinkme.click, themezon.net, and mrproblogger.com
