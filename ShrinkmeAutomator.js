@@ -1,11 +1,13 @@
 // ==UserScript==
-// @name         Shrinkme to Themezon Automator
+// @name         Combined Link Bypasser & Observer
 // @namespace    http://tampermonkey.net/
-// @version      1.0
-// @description  Automates link bypassing between shrinkme.click and themezon.net
-// @author       Your Name
+// @version      1.1
+// @description  Automates link bypassing across shrinkme.click, themezon.net, and mrproblogger.com
+// @author       ABcr892
+// @match        *://en.mrproblogger.com/*
 // @match        *://*.shrinkme.click/*
 // @match        *://*.themezon.net/*
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=mrproblogger.com
 // @grant        none
 // @run-at       document-end
 // ==/UserScript==
@@ -15,7 +17,47 @@
 
     const currentUrl = window.location.href;
 
-    // === STEP 1: Shrinkme.click Handling ===
+    // =========================================================================
+    // 1. MRPROBLOGGER.COM HANDLING (Mutation Observer for 'get-link' button)
+    // =========================================================================
+    if (currentUrl.includes('mrproblogger.com')) {
+        console.log("Observer active. Watching for the exact moment the server enables the link...");
+
+        const targetBtn = document.querySelector('.get-link');
+
+        if (!targetBtn) {
+            console.error("Could not find the target button.");
+            return;
+        }
+
+        // If the button is somehow already active, click it immediately
+        if (!targetBtn.classList.contains('disabled')) {
+            targetBtn.click();
+            return;
+        }
+
+        // Set up an observer to watch for changes to the button's attributes/classes
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.attributeName === 'class') {
+                    const currentClass = mutation.target.className;
+                    // If 'disabled' is no longer part of the class list, the server time is up
+                    if (!currentClass.includes('disabled')) {
+                        console.log("Class change detected! Simulating click event...");
+                        mutation.target.click();
+                        observer.disconnect(); // Stop watching to prevent infinite loops
+                    }
+                }
+            });
+        });
+
+        // Start monitoring the button
+        observer.observe(targetBtn, { attributes: true });
+    }
+
+    // =========================================================================
+    // 2. SHRINKME.CLICK HANDLING
+    // =========================================================================
     if (currentUrl.includes('shrinkme.click')) {
         const verificationDiv = document.getElementById("div-human-verification");
         if (verificationDiv) {
@@ -26,15 +68,15 @@
         }
     }
 
-    // === STEP 2 & 3: Themezon.net Handling ===
+    // =========================================================================
+    // 3. THEMEZON.NET HANDLING
+    // =========================================================================
     if (currentUrl.includes('themezon.net')) {
-
-        // Check if we are on the first landing page (Step 2) vs the final page (Step 3)
+        // Check if we are on the first landing page vs the final page
         // We target the non-search form to submit for Step 2
         const step2Form = document.querySelector('form:not(.search-form)');
 
         if (step2Form && currentUrl.includes('link.php')) {
-            // --- STEP 2 CODE ---
             const hiddenForms = document.querySelectorAll('form, a[href*="link"]');
             if (hiddenForms.length > 0) {
                 console.log("Found potential landing hooks:", hiddenForms);
@@ -46,7 +88,6 @@
             step2Form.submit();
 
         } else {
-            // --- STEP 3 CODE ---
             // 1. Enable disabled elements
             document.querySelectorAll('[disabled]').forEach(el => el.removeAttribute('disabled'));
 
@@ -62,7 +103,7 @@
                 const valueMatch = btn.value && btn.value.match(/(get|link|go|continue|submit|skip)/i);
 
                 if (textMatch || valueMatch) {
-                    console.log("?? Found likely target button, forcing click:", btn);
+                    console.log("Found likely target button, forcing click:", btn);
                     btn.click();
                 }
             });
