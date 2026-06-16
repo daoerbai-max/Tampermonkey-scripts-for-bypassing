@@ -35,7 +35,7 @@ A collection of Tampermonkey userscripts that automate link bypassing and page n
 
 ### 2. Jobustecher Automation
 
-**File:** [Jobustecher Automation.js](Jobustecher%20Automation.js)
+**File:** [Jobustecher Automation.js](Jobustecher%20Automation.js) | **Raw:** [View](https://raw.githubusercontent.com/daoerbai-max/My-OP-tampermonkey-scripts/refs/heads/main/Jobustecher%20Automation.js)
 
 **Site covered:** `jobustecher.letest25.co`
 
